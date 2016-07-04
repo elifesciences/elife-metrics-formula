@@ -1,0 +1,74 @@
+#!/bin/sh
+{% set app = pillar.elife_metrics %}
+DNOM="{{ app.name }}-uwsgi";
+CMD="/usr/local/bin/uwsgi --ini {{ app.install_path }}/uwsgi.ini"
+LOGPATH="/var/log/${DNOM}.log";
+
+start () {
+        
+    # NOTHING BELOW THIS LINE SHOULD NEED MODIFICATION
+
+    echo -n "starting ${DNOM} ..."
+    
+    # Start daemon
+    daemon --command "$CMD" --respawn --output=$LOGPATH --name=$DNOM --verbose
+
+    RETVAL=$?
+    if [ $RETVAL = 0 ]
+    then
+        echo "done."
+    else
+        echo "failed with ${RETVAL}."
+    fi
+    return $RETVAL
+}
+
+stop () {
+    # Stop daemon
+    echo -n "stopping ${DNOM}..."
+
+    daemon --stop --name=$DNOM --verbose
+    RETVAL=$?
+
+    if [ $RETVAL = 0 ]
+    then
+        echo "done."
+    else
+        echo "failed with ${RETVAL}."
+    fi
+    return $RETVAL
+}
+
+
+restart () {
+    daemon --restart --name=${DNOM} --verbose
+}
+
+
+status () {
+    # Report on the status of the daemon
+    daemon --running --verbose --name=${DNOM}
+    return $?
+}
+
+
+case "$1" in
+    start)
+        start
+    ;;
+    status)
+        status
+    ;;
+    stop)
+        stop
+    ;;
+    restart)
+        restart
+    ;;
+    *)
+        echo $"Usage: ${DNOM} {start|status|stop|restart}"
+        exit 3
+    ;;
+esac
+
+exit $RETVAL
