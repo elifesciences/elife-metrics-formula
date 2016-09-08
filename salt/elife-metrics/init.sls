@@ -28,6 +28,7 @@ cfg-file:
         - user: {{ pillar.elife.deploy_user.username }}
         - name: /srv/{{ app.name }}/app.cfg
         - source:
+            - salt://{{ app.name }}/config/srv-{{ app.name }}-{{ pillar.elife.env }}.cfg
             - salt://{{ app.name }}/config/srv-{{ app.name }}-{{ salt['elife.cfg']('project.branch', 'develop') }}.cfg
             - salt://{{ app.name }}/config/srv-{{ app.name }}-app.cfg
         - template: jinja
