@@ -74,6 +74,7 @@ cfg-file:
         - db_host: {{ salt['elife.cfg']('cfn.outputs.RDSHost') }}
         - db_port: {{ salt['elife.cfg']('cfn.outputs.RDSPort') }}
         {% endif %}
+        - createdb: True
         - require:
             - postgres_user: postgresql-user
 
