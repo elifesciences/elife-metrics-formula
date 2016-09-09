@@ -18,7 +18,7 @@
         - source: salt://{{ app.name }}/config/srv-{{ app.name }}-uwsgi.ini
         - template: jinja
         - require:
-            - git: install-{{ app.name }}
+            - install-{{ app.name }}
 
 {{ app.name }}-uwsgi-service:
     file.managed:
@@ -40,6 +40,6 @@
             - file: {{ app.name }}-log-file
 
         - watch:
-            - git: install-{{ app.name }}
+            - install-{{ app.name }}
             # restart uwsgi if nginx service changes 
             - service: nginx-server-service
