@@ -33,7 +33,7 @@ cfg-file:
             - salt://{{ app.name }}/config/srv-{{ app.name }}-app.cfg
         - template: jinja
         - require:
-            - git: install-{{ app.name }}
+            - install-{{ app.name }}
 
 #
 # logging
@@ -104,7 +104,7 @@ configure-{{ app.name }}:
         - cwd: {{ app.install_path }}
         - name: ./install.sh && ./manage.sh collectstatic --noinput
         - require:
-            - git: install-{{ app.name }}
+            - install-{{ app.name }}
             - file: cfg-file
             - pkg: {{ app.name }}-deps
             - file: {{ app.name }}-log-file
@@ -117,7 +117,7 @@ configure-{{ app.name }}:
         - source: salt://{{ app.name }}/config/srv-elife-metrics-client-secrets.json
         - template: jinja
         - require:
-            - git: install-{{ app.name }}
+            - install-{{ app.name }}
 
 
 #
