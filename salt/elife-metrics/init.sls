@@ -11,7 +11,7 @@ install-{{ app.name }}:
         - user: {{ pillar.elife.deploy_user.username }}
         - group: {{ pillar.elife.deploy_user.username }}
 
-    git.latest:
+    builder.git_latest:
         - user: {{ pillar.elife.deploy_user.username }}
         - name: https://github.com/elifesciences/{{ app.name }}
         - rev: {{ salt['elife.cfg']('project.branch', 'master') }}
