@@ -14,8 +14,8 @@ install-{{ app.name }}:
     builder.git_latest:
         - user: {{ pillar.elife.deploy_user.username }}
         - name: https://github.com/elifesciences/{{ app.name }}
-        - rev: {{ salt['elife.cfg']('project.branch', 'master') }}
-        - branch: {{ salt['elife.cfg']('project.branch', 'master') }}
+        - rev: {{ salt['elife.cfg']('project.revision', 'project.branch', 'master') }}
+        - branch: {{ salt['elife.branch']() }}
         - target: {{ app.install_path }}
         - force_fetch: True
         - force_checkout: True
