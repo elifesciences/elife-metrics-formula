@@ -111,11 +111,12 @@ configure-{{ app.name }}:
             - postgres_user: {{ app.name }}-db-user
 
 {{ app.name }}-auth:
-    file.managed:
-        - user: {{ pillar.elife.deploy_user.username }}
+    file.serialize:
         - name: {{ app.install_path }}/client-secrets.json
-        - source: salt://{{ app.name }}/config/srv-elife-metrics-client-secrets.json
-        - template: jinja
+        - dataset_pillar: elife_metrics:client_secrets
+        - formatter: json
+        - user: {{ pillar.elife.deploy_user.username }}
+        - group: {{ pillar.elife.deploy_user.username }}
         - require:
             - install-{{ app.name }}
 

@@ -20,3 +20,4 @@ elife_metrics:
         private_key: baz
         client_id: bar
         client_email: bup
+        type: service_account
