@@ -69,10 +69,12 @@ cfg-file:
         - password: {{ app.db.password }}
         - refresh_password: True
         - db_user: {{ pillar.elife.db_root.username }}
-        - db_password: {{ pillar.elife.db_root.password }}
         {% if salt['elife.cfg']('cfn.outputs.RDSHost') %}
+        - db_password: {{ salt['elife.cfg']('project.rds_password') }}
         - db_host: {{ salt['elife.cfg']('cfn.outputs.RDSHost') }}
         - db_port: {{ salt['elife.cfg']('cfn.outputs.RDSPort') }}
+        {% else %}
+        - db_password: {{ pillar.elife.db_root.password }}
         {% endif %}
         - createdb: True
         - require:
@@ -82,14 +84,12 @@ cfg-file:
     postgres_database.present:
         - name: {{ app.db.name }}
         - owner: {{ app.db.username }}
-        
-        - db_user: {{ pillar.elife.db_root.username }}
-        - db_password: {{ pillar.elife.db_root.password }}
+        - db_user: {{ app.db.username }}
+        - db_password: {{ app.db.password }}
         {% if salt['elife.cfg']('cfn.outputs.RDSHost') %}
         - db_host: {{ salt['elife.cfg']('cfn.outputs.RDSHost') }}
         - db_port: {{ salt['elife.cfg']('cfn.outputs.RDSPort') }}
         {% endif %}
-        
         - require:
             - postgres_user: {{ app.name }}-db-user
 
