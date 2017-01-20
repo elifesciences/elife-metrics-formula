@@ -29,9 +29,8 @@ cfg-file:
     file.managed:
         - user: {{ deploy_user }}
         - name: /srv/elife-metrics/app.cfg
-        - source:
-            - salt://elife-metrics/config/srv-elife-metrics-{{ pillar.elife.env }}.cfg
-            - salt://elife-metrics/config/srv-elife-metrics-{{ salt['elife.cfg']('project.branch', 'develop') }}.cfg
+        - source:       
+            - salt://elife-metrics/config/srv-elife-metrics-{{ salt['elife.cfg']('project.branch') }}.cfg
             - salt://elife-metrics/config/srv-elife-metrics-app.cfg
         - template: jinja
         - require:

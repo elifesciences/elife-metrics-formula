@@ -2,7 +2,7 @@ elife-metrics-nginx-conf:
     file.managed:
         - name: /etc/nginx/sites-enabled/elife-metrics.conf
         - template: jinja
-        - source: salt://elife-metrics/config/etc-nginx-sitesavailable-elife-metrics.conf
+        - source: salt://elife-metrics/config/etc-nginx-sitesenabled-elife-metrics.conf
         - require:
             - pkg: nginx-server
 {% if salt['elife.cfg']('cfn.outputs.DomainName') %}
@@ -25,9 +25,6 @@ elife-metrics-uwsgi-conf:
 
 uwsgi-elife-metrics:
     file.managed:
-        #- name: /etc/init.d/uwsgi-elife-metrics
-        #- source: salt://elife-metrics/config/etc-init.d-uwsgi-elife-metrics
-
         - name: /etc/init/uwsgi-elife-metrics.conf
         - source: salt://elife-metrics/config/etc-init-uwsgi-elife-metrics.conf
         - template: jinja
@@ -44,5 +41,4 @@ uwsgi-elife-metrics:
             - file: elife-metrics-log-file
         - watch:
             - install-elife-metrics
-            # restart uwsgi if nginx service changes 
             - service: nginx-server-service

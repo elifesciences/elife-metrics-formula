@@ -1,6 +1,7 @@
 base:
     '*':
         - elife
+        - elife.no-more-daemon
         - elife.nginx
         - elife.uwsgi
         - elife.postgresql
