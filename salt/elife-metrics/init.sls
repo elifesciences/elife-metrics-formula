@@ -1,59 +1,61 @@
 {% set app = pillar.elife_metrics %}
+{% set deploy_user = pillar.elife.deploy_user.username %}
 
-{{ app.name }}-deps:
-    pkg.installed:
-        - pkgs: 
-            - libffi-dev
+# this was part of some ssl issues iirc. no longer a problem
+#elife-metrics-deps:
+#    pkg.installed:
+#        - pkgs: 
+#            - libffi-dev
 
-install-{{ app.name }}:
+install-elife-metrics:
     file.directory:
-        - name: {{ app.install_path }}
-        - user: {{ pillar.elife.deploy_user.username }}
-        - group: {{ pillar.elife.deploy_user.username }}
+        - name: /srv/elife-metrics/
+        - user: {{ deploy_user }}
+        - group: {{ deploy_user }}
 
     builder.git_latest:
-        - user: {{ pillar.elife.deploy_user.username }}
-        - name: https://github.com/elifesciences/{{ app.name }}
+        - user: {{ deploy_user }}
+        - name: https://github.com/elifesciences/elife-metrics
         - rev: {{ salt['elife.cfg']('project.revision', 'project.branch', 'master') }}
         - branch: {{ salt['elife.branch']() }}
-        - target: {{ app.install_path }}
+        - target: /srv/elife-metrics/
         - force_fetch: True
         - force_checkout: True
         - force_reset: True
         - require:
-            - file: install-{{ app.name }}
+            - file: install-elife-metrics
 
 cfg-file:
     file.managed:
-        - user: {{ pillar.elife.deploy_user.username }}
-        - name: /srv/{{ app.name }}/app.cfg
+        - user: {{ deploy_user }}
+        - name: /srv/elife-metrics/app.cfg
         - source:
-            - salt://{{ app.name }}/config/srv-{{ app.name }}-{{ pillar.elife.env }}.cfg
-            - salt://{{ app.name }}/config/srv-{{ app.name }}-{{ salt['elife.cfg']('project.branch', 'develop') }}.cfg
-            - salt://{{ app.name }}/config/srv-{{ app.name }}-app.cfg
+            - salt://elife-metrics/config/srv-elife-metrics-{{ pillar.elife.env }}.cfg
+            - salt://elife-metrics/config/srv-elife-metrics-{{ salt['elife.cfg']('project.branch', 'develop') }}.cfg
+            - salt://elife-metrics/config/srv-elife-metrics-app.cfg
         - template: jinja
         - require:
-            - install-{{ app.name }}
+            - install-elife-metrics
 
 #
 # logging
 #
 
-{{ app.name }}-log-file:
+elife-metrics-log-file:
     file.managed:
-        - name: /var/log/{{ app.name }}.log
+        - name: /var/log/elife-metrics.log
         - user: {{ pillar.elife.webserver.username }}
         - group: {{ pillar.elife.webserver.username }}
         - mode: 660
 
-{{ app.name }}-syslog-conf:
+elife-metrics-syslog-conf:
     file.managed:
-        - name: /etc/syslog-ng/conf.d/{{ app.name }}.conf
-        - source: salt://{{ app.name }}/config/etc-syslog-ng-conf.d-{{ app.name }}.conf
+        - name: /etc/syslog-ng/conf.d/elife-metrics.conf
+        - source: salt://elife-metrics/config/etc-syslog-ng-conf.d-elife-metrics.conf
         - template: jinja
         - require:
             - pkg: syslog-ng
-            - file: {{ app.name }}-log-file
+            - file: elife-metrics-log-file
         - watch_in:
             - service: syslog-ng
 
@@ -62,7 +64,7 @@ cfg-file:
 # db
 #
 
-{{ app.name }}-db-user:
+elife-metrics-db-user:
     postgres_user.present:
         - name: {{ app.db.username }}
         - encrypted: True
@@ -80,7 +82,7 @@ cfg-file:
         - require:
             - postgres_user: postgresql-user
 
-{{ app.name }}-db-exists:
+elife-metrics-db-exists:
     postgres_database.present:
         - name: {{ app.db.name }}
         - owner: {{ app.db.username }}
@@ -91,35 +93,34 @@ cfg-file:
         - db_port: {{ salt['elife.cfg']('cfn.outputs.RDSPort') }}
         {% endif %}
         - require:
-            - postgres_user: {{ app.name }}-db-user
+            - postgres_user: elife-metrics-db-user
 
 
 #
 # configure
 # 
 
-configure-{{ app.name }}:
+configure-elife-metrics:
     cmd.run:
-        - user: {{ pillar.elife.deploy_user.username }}
-        - cwd: {{ app.install_path }}
+        - user: {{ deploy_user }}
+        - cwd: /srv/elife-metrics/
         - name: ./install.sh && ./manage.sh collectstatic --noinput
         - require:
-            - install-{{ app.name }}
+            - install-elife-metrics
             - file: cfg-file
-            - pkg: {{ app.name }}-deps
-            - file: {{ app.name }}-log-file
-            - postgres_user: {{ app.name }}-db-user
+            #- pkg: elife-metrics-deps
+            - file: elife-metrics-log-file
+            - postgres_user: elife-metrics-db-user
 
-{{ app.name }}-auth:
+elife-metrics-auth:
     file.serialize:
-        - name: {{ app.install_path }}/client-secrets.json
+        - name: /srv/elife-metrics//client-secrets.json
         - dataset_pillar: elife_metrics:client_secrets
         - formatter: json
-        - user: {{ pillar.elife.deploy_user.username }}
-        - group: {{ pillar.elife.deploy_user.username }}
+        - user: {{ deploy_user }}
+        - group: {{ deploy_user }}
         - require:
-            - install-{{ app.name }}
-
+            - install-elife-metrics
 
 #
 # cron
@@ -128,11 +129,11 @@ configure-{{ app.name }}:
 # 00:00, every day
 load-articles-every-day:
     cron.present:
-        - user: {{ pillar.elife.deploy_user.username }}
-        - name: cd {{ app.install_path }} && ./import-metrics.sh
+        - user: {{ deploy_user }}
+        - name: cd /srv/elife-metrics/ && ./import-metrics.sh
         - identifier: load-metrics-every-day
         - minute: 0
         - hour: 0
         - require:
-            - postgres_database: {{ app.name }}-db-exists
+            - postgres_database: elife-metrics-db-exists
 

@@ -1,45 +1,48 @@
-{% set app = pillar.elife_metrics %}
-
-{{ app.name }}-nginx-conf:
+elife-metrics-nginx-conf:
     file.managed:
-        - name: /etc/nginx/sites-enabled/{{ app.name }}.conf
+        - name: /etc/nginx/sites-enabled/elife-metrics.conf
         - template: jinja
-{% if pillar.elife.dev %}
-        - source: salt://{{ app.name }}/config/etc-nginx-sitesavailable-{{ app.name }}-http.conf
-{% else %}
-        - source: salt://{{ app.name }}/config/etc-nginx-sitesavailable-{{ app.name }}-https.conf
+        - source: salt://elife-metrics/config/etc-nginx-sitesavailable-elife-metrics.conf
         - require:
-            - cmd: acme-fetch-certs
+            - pkg: nginx-server
+{% if salt['elife.cfg']('cfn.outputs.DomainName') %}
+            - cmd: web-ssl-enabled
 {% endif %}
 
-{{ app.name }}-uwsgi-conf:
+# we used to redirect all traffic to https but don't anymore
+# now we simply block all external traffic on port 80
+remove-unencrypted-redirect:
+    file.absent:
+        - name: /etc/nginx/sites-enabled/unencrypted-redirect.conf
+
+elife-metrics-uwsgi-conf:
     file.managed:
-        - name: {{ app.install_path }}/uwsgi.ini
-        - source: salt://{{ app.name }}/config/srv-{{ app.name }}-uwsgi.ini
+        - name: /srv/elife-metrics/uwsgi.ini
+        - source: salt://elife-metrics/config/srv-elife-metrics-uwsgi.ini
         - template: jinja
         - require:
-            - install-{{ app.name }}
+            - install-elife-metrics
 
-{{ app.name }}-uwsgi-service:
+uwsgi-elife-metrics:
     file.managed:
-        - name: /etc/init.d/uwsgi-{{ app.name }}
-        - source: salt://{{ app.name }}/config/etc-init.d-uwsgi-{{ app.name }}
+        #- name: /etc/init.d/uwsgi-elife-metrics
+        #- source: salt://elife-metrics/config/etc-init.d-uwsgi-elife-metrics
+
+        - name: /etc/init/uwsgi-elife-metrics.conf
+        - source: salt://elife-metrics/config/etc-init-uwsgi-elife-metrics.conf
         - template: jinja
         - mode: 755
 
     service.running:
-        - name: uwsgi-{{ app.name }}
         - enable: True
         - require:
             - file: uwsgi-params
             - pip: uwsgi-pkg
-            
-            - file: {{ app.name }}-uwsgi-service
-            - file: {{ app.name }}-uwsgi-conf
-            - file: {{ app.name }}-nginx-conf
-            - file: {{ app.name }}-log-file
-
+            - file: uwsgi-elife-metrics
+            - file: elife-metrics-uwsgi-conf
+            - file: elife-metrics-nginx-conf
+            - file: elife-metrics-log-file
         - watch:
-            - install-{{ app.name }}
+            - install-elife-metrics
             # restart uwsgi if nginx service changes 
             - service: nginx-server-service

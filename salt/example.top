@@ -3,7 +3,6 @@ base:
         - elife
         - elife.nginx
         - elife.uwsgi
-        - elife.acme
         - elife.postgresql
         - elife-metrics
         - elife-metrics.uwsgi
