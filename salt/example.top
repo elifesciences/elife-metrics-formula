@@ -7,3 +7,4 @@ base:
         - elife.postgresql
         - elife-metrics
         - elife-metrics.uwsgi
+        - elife-metrics.newrelic
