@@ -11,6 +11,8 @@ elife_metrics:
         
     secret: "dev.settings.do.not.use.in.prod.ever"
     ga_table_id: 12345678
+    scopus:
+        api_key: 12345567
     
     # credentials provided by Google to access API via oauth
     # https://developers.google.com/api-client-library/python/auth/api-keys
