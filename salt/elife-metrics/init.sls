@@ -121,6 +121,15 @@ elife-metrics-auth:
         - require:
             - install-elife-metrics
 
+load-pmcids:
+    cmd.run:
+        - user: {{ deploy_user }}
+        - cwd: /srv/elife-metrics/
+        - name: ./download-pmcids.sh && touch .pmcids-loaded.flag
+        - creates: .pmcids-loaded.flag
+        - require:
+            - configure-elife-metrics
+
 #
 # cron
 #
