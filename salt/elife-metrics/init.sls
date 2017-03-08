@@ -127,6 +127,8 @@ load-pmcids:
         - cwd: /srv/elife-metrics/
         - name: ./download-pmcids.sh && touch .pmcids-loaded.flag
         - creates: .pmcids-loaded.flag
+        - onlyif:
+            - test -f download-pmcids.sh
         - require:
             - configure-elife-metrics
 
