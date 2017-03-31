@@ -139,7 +139,7 @@ load-pmcids:
 # 00:00, every day
 # only run on prod and adhoc instances
 load-articles-every-day:
-    {% if pillar.elife.env in ['dev', 'ci', 'end2end'] %}
+    {% if pillar.elife.env in ['dev', 'continuumtest', 'ci', 'end2end'] %}
     cron.absent:
     {% else %}
     cron.present:
