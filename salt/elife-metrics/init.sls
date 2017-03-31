@@ -137,8 +137,13 @@ load-pmcids:
 #
 
 # 00:00, every day
+# only run on prod and adhoc instances
 load-articles-every-day:
+    {% if pillar.elife.env in ['dev', 'ci', 'end2end'] %}
+    cron.absent:
+    {% else %}
     cron.present:
+    {% endif %}
         - user: {{ deploy_user }}
         - name: cd /srv/elife-metrics/ && ./import-metrics.sh
         - identifier: load-metrics-every-day
