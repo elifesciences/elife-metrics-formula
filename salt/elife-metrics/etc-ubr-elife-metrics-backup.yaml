@@ -1,0 +1,2 @@
+postgresql-database:
+    - {{ salt['elife.cfg']('project.rds_dbname') or pillar.elife_metrics.db.name }}

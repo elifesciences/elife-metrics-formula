@@ -83,17 +83,37 @@ elife-metrics-db-user:
 
 elife-metrics-db-exists:
     postgres_database.present:
-        - name: {{ app.db.name }}
-        - owner: {{ app.db.username }}
-        - db_user: {{ app.db.username }}
-        - db_password: {{ app.db.password }}
         {% if salt['elife.cfg']('cfn.outputs.RDSHost') %}
+        # remote
+        - name: {{ salt['elife.cfg']('project.rds_dbname') }}
         - db_host: {{ salt['elife.cfg']('cfn.outputs.RDSHost') }}
         - db_port: {{ salt['elife.cfg']('cfn.outputs.RDSPort') }}
+        {% else %}
+        # local
+        - name: {{ app.db.name }}
         {% endif %}
+        - db_user: {{ app.db.username }}
+        - db_password: {{ app.db.password }}
         - require:
             - postgres_user: elife-metrics-db-user
 
+db-perms-to-rds_superuser:
+    cmd.script:
+        - name: salt://elife/scripts/rds-perms.sh
+        - template: jinja
+        - defaults:
+            user: {{ app.db.username }}
+            pass: {{ app.db.password }}
+        - require:
+            - elife-metrics-db-exists
+
+ubr-app-db-backup:
+    file.managed:
+        - name: /etc/ubr/elife-metrics-backup.yaml
+        - source: salt://elife-metrics/config/etc-ubr-elife-metrics-backup.yaml
+        - template: jinja
+        - require:
+            - elife-metrics-db-exists
 
 #
 # configure
