@@ -172,3 +172,8 @@ load-articles-every-day:
         - require:
             - postgres_database: elife-metrics-db-exists
 
+logrotate-metrics-logs:
+    file.managed:
+        - name: /etc/logrotate.d/elife-metrics
+        - source: salt://elife-metrics/config/etc-logrotate.d-elife-metrics
+        - template: jinja
