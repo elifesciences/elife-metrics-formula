@@ -25,6 +25,11 @@ elife_metrics:
         subscriber: null
         region: us-east-1
 
+    aws:
+        access_key_id: null
+        secret_access_key: null
+        region: us-east-1
+
     # credentials provided by Google to access API via oauth
     # https://developers.google.com/api-client-library/python/auth/api-keys
     # https://developers.google.com/api-client-library/python/guide/aaa_client_secrets

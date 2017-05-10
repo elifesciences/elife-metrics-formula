@@ -131,6 +131,16 @@ configure-elife-metrics:
             - file: elife-metrics-log-file
             - postgres_user: elife-metrics-db-user
 
+aws-credentials-www-data-user:
+    file.managed:
+        - name: /var/www/.aws/credentials
+        - user: {{ pillar.elife.webserver.username }}
+        - makedirs: True
+        - source: salt://elife-metrics/config/var-www-.aws-credentials
+        - template: jinja
+        - require:
+            - configure-elife-metrics
+
 elife-metrics-auth:
     file.serialize:
         - name: /srv/elife-metrics//client-secrets.json
