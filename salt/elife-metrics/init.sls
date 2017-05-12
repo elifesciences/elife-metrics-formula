@@ -29,7 +29,7 @@ cfg-file:
     file.managed:
         - user: {{ deploy_user }}
         - name: /srv/elife-metrics/app.cfg
-        - source:       
+        - source:
             - salt://elife-metrics/config/srv-elife-metrics-{{ salt['elife.cfg']('project.branch') }}.cfg
             - salt://elife-metrics/config/srv-elife-metrics-app.cfg
         - template: jinja
@@ -155,8 +155,8 @@ load-pmcids:
     cmd.run:
         - user: {{ deploy_user }}
         - cwd: /srv/elife-metrics/
-        - name: ./download-pmcids.sh && touch .pmcids-loaded.flag
-        - creates: .pmcids-loaded.flag
+        - name: ./download-pmcids.sh && touch /home/elife/.pmcids-loaded.flag
+        - creates: /home/elife/.pmcids-loaded.flag
         - onlyif:
             - test -f download-pmcids.sh
         - require:
