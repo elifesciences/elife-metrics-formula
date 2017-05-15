@@ -131,6 +131,16 @@ configure-elife-metrics:
             - file: elife-metrics-log-file
             - postgres_user: elife-metrics-db-user
 
+aws-credentials-deploy-user:
+    file.managed:
+        - name: /home/{{ deploy_user }}/.aws/credentials
+        - user: {{ deploy_user }}
+        - makedirs: True
+        - source: salt://elife-metrics/config/home-deploy-user-.aws-credentials
+        - template: jinja
+        - require:
+            - configure-elife-metrics
+
 aws-credentials-www-data-user:
     file.managed:
         - name: /var/www/.aws/credentials
