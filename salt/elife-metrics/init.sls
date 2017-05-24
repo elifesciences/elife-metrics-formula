@@ -43,9 +43,18 @@ cfg-file:
 elife-metrics-log-file:
     file.managed:
         - name: /var/log/elife-metrics.log
-        - user: {{ pillar.elife.webserver.username }}
+        - user: {{ deploy_user }}
         - group: {{ pillar.elife.webserver.username }}
         - mode: 660
+
+elife-metrics-debugme-log-file:
+    file.managed:
+        - name: /srv/elife-metrics/debugme.log
+        - user: {{ deploy_user }}
+        - group: {{ pillar.elife.webserver.username }}
+        - mode: 660
+        - require:
+            - install-elife-metrics
 
 elife-metrics-syslog-conf:
     file.managed:

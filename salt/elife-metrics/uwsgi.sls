@@ -39,6 +39,7 @@ uwsgi-elife-metrics:
             - file: elife-metrics-uwsgi-conf
             - file: elife-metrics-nginx-conf
             - file: elife-metrics-log-file
+            - file: elife-metrics-debugme-log-file
         - watch:
             - install-elife-metrics
             - service: nginx-server-service
