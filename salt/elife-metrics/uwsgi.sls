@@ -32,6 +32,7 @@ uwsgi-elife-metrics:
 
     service.running:
         - enable: True
+        - reload: True
         - require:
             - file: uwsgi-params
             - pip: uwsgi-pkg
