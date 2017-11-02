@@ -88,7 +88,7 @@ elife-metrics-db-user:
         {% endif %}
         - createdb: True
         - require:
-            - postgres_user: postgresql-user
+            - postgresql-ready
 
 elife-metrics-db-exists:
     postgres_database.present:
@@ -104,7 +104,7 @@ elife-metrics-db-exists:
         - db_user: {{ app.db.username }}
         - db_password: {{ app.db.password }}
         - require:
-            - postgres_user: elife-metrics-db-user
+            - elife-metrics-db-user
 
 db-perms-to-rds_superuser:
     cmd.script:
