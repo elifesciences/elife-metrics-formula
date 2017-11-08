@@ -7,9 +7,9 @@ WantedBy=multi-user.target
 
 [Service]
 Environment="LANG=en_US.UTF-8"
-StandardError=syslog
-StandardOut=syslog
 Restart=on-failure
+KillSignal=SIGQUIT
+Type=notify
 {% if pillar.elife.newrelic.enabled %}
 # '--enable-threads' is required:
 # https://docs.newrelic.com/docs/agents/python-agent/hosting-mechanisms/python-agent-uwsgi
