@@ -5,5 +5,6 @@ base:
         - elife.nginx
         - elife.uwsgi
         - elife.postgresql
+        - elife.postgresql-appdb
         - elife-metrics
         - elife-metrics.uwsgi
