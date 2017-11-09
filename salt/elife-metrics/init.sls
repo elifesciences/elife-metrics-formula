@@ -9,8 +9,9 @@ install-elife-metrics:
 
     builder.git_latest:
         - user: {{ deploy_user }}
-        - name: https://github.com/elifesciences/elife-metrics
-        - rev: {{ salt['elife.cfg']('project.revision', 'project.branch', 'master') }}
+        - name: git@github.com:elifesciences/elife-metrics
+        - identity: {{ pillar.elife.projects_builder.key or '' }}
+        - rev: {{ salt['elife.rev']() }}
         - branch: {{ salt['elife.branch']() }}
         - target: /srv/elife-metrics/
         - force_fetch: True
