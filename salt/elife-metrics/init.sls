@@ -1,12 +1,6 @@
 {% set app = pillar.elife_metrics %}
 {% set deploy_user = pillar.elife.deploy_user.username %}
 
-# this was part of some ssl issues iirc. no longer a problem
-#elife-metrics-deps:
-#    pkg.installed:
-#        - pkgs: 
-#            - libffi-dev
-
 install-elife-metrics:
     file.directory:
         - name: /srv/elife-metrics/
@@ -67,62 +61,11 @@ elife-metrics-syslog-conf:
         - watch_in:
             - service: syslog-ng
 
-
-#
-# db
-#
-
-elife-metrics-db-user:
-    postgres_user.present:
-        - name: {{ app.db.username }}
-        - encrypted: True
-        - password: {{ app.db.password }}
-        - refresh_password: True
-        - db_user: {{ pillar.elife.db_root.username }}
-        {% if salt['elife.cfg']('cfn.outputs.RDSHost') %}
-        - db_password: {{ salt['elife.cfg']('project.rds_password') }}
-        - db_host: {{ salt['elife.cfg']('cfn.outputs.RDSHost') }}
-        - db_port: {{ salt['elife.cfg']('cfn.outputs.RDSPort') }}
-        {% else %}
-        - db_password: {{ pillar.elife.db_root.password }}
-        {% endif %}
-        - createdb: True
-        - require:
-            - postgresql-ready
-
-elife-metrics-db-exists:
-    postgres_database.present:
-        {% if salt['elife.cfg']('cfn.outputs.RDSHost') %}
-        # remote
-        - name: {{ salt['elife.cfg']('project.rds_dbname') }}
-        - db_host: {{ salt['elife.cfg']('cfn.outputs.RDSHost') }}
-        - db_port: {{ salt['elife.cfg']('cfn.outputs.RDSPort') }}
-        {% else %}
-        # local
-        - name: {{ app.db.name }}
-        {% endif %}
-        - db_user: {{ app.db.username }}
-        - db_password: {{ app.db.password }}
-        - require:
-            - elife-metrics-db-user
-
-db-perms-to-rds_superuser:
-    cmd.script:
-        - name: salt://elife/scripts/rds-perms.sh
-        - template: jinja
-        - defaults:
-            user: {{ app.db.username }}
-            pass: {{ app.db.password }}
-        - require:
-            - elife-metrics-db-exists
-
 ubr-app-db-backup:
     file.managed:
         - name: /etc/ubr/elife-metrics-backup.yaml
         - source: salt://elife-metrics/config/etc-ubr-elife-metrics-backup.yaml
         - template: jinja
-        - require:
-            - elife-metrics-db-exists
 
 #
 # configure
@@ -136,9 +79,7 @@ configure-elife-metrics:
         - require:
             - install-elife-metrics
             - file: cfg-file
-            #- pkg: elife-metrics-deps
             - file: elife-metrics-log-file
-            - postgres_user: elife-metrics-db-user
 
 aws-credentials-deploy-user:
     file.managed:
@@ -198,8 +139,6 @@ load-articles-every-day:
         - identifier: load-metrics-every-day
         - minute: 0
         - hour: 0
-        - require:
-            - postgres_database: elife-metrics-db-exists
 
 logrotate-metrics-logs:
     file.managed:
