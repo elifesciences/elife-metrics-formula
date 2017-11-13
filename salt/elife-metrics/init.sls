@@ -2,13 +2,7 @@
 {% set deploy_user = pillar.elife.deploy_user.username %}
 
 install-elife-metrics:
-    file.directory:
-        - name: /srv/elife-metrics/
-        - user: {{ deploy_user }}
-        - group: {{ deploy_user }}
-
     builder.git_latest:
-        - user: {{ deploy_user }}
         - name: git@github.com:elifesciences/elife-metrics
         - identity: {{ pillar.elife.projects_builder.key or '' }}
         - rev: {{ salt['elife.rev']() }}
@@ -17,8 +11,17 @@ install-elife-metrics:
         - force_fetch: True
         - force_checkout: True
         - force_reset: True
+
+    file.directory:
+        - name: /srv/elife-metrics/
+        - user: {{ deploy_user }}
+        - group: {{ deploy_user }}
+        - recurse:
+            - user
+            - group
         - require:
-            - file: install-elife-metrics
+            - builder: install-elife-metrics
+
 
 cfg-file:
     file.managed:
