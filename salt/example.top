@@ -2,6 +2,7 @@ base:
     '*':
         - elife
         - elife.no-more-daemon
+        - elife.python3
         - elife.nginx
         - elife.uwsgi
         - elife.postgresql
