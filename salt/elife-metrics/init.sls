@@ -144,6 +144,15 @@ load-articles-every-day:
         - minute: 0
         - hour: 0
 
+# once a week, remove any partial files that are hanging around
+# these are deliberate cache misses for periods that will return partial results
+rm-partial-files-every-week:
+    cron.present:
+        - user: {{ deploy_user }}
+        - name: cd /src/elife-metrics/output && find . -name '*\.partial' -delete
+        - identifier: rm-partial-files-every-week
+        - special: "@weekly"
+
 logrotate-metrics-logs:
     file.managed:
         - name: /etc/logrotate.d/elife-metrics
