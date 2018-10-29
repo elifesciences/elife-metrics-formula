@@ -35,7 +35,7 @@ uwsgi-elife-metrics:
         - reload: True
         - require:
             - file: uwsgi-params
-            - pip: uwsgi-pkg
+            - uwsgi-pkg
             - file: uwsgi-elife-metrics
             - file: elife-metrics-uwsgi-conf
             - file: elife-metrics-nginx-conf
