@@ -149,7 +149,7 @@ load-articles-every-day:
 rm-partial-files-every-week:
     cron.present:
         - user: {{ deploy_user }}
-        - name: cd /src/elife-metrics/output && find . -name '*\.partial' -delete
+        - name: cd /srv/elife-metrics/output && find . -name '*\.partial' -delete
         - identifier: rm-partial-files-every-week
         - special: "@weekly"
 
