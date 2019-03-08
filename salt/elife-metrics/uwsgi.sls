@@ -39,6 +39,8 @@ uwsgi-elife-metrics:
         - enable: True
         - require:
             - file: uwsgi-params
+            - uwsgi-pkg
+            - file: uwsgi-elife-metrics
             - uwsgi-elife-metrics-systemd
             - uwsgi-elife-metrics-upstart
             - file: elife-metrics-uwsgi-conf

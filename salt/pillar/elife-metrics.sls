@@ -2,13 +2,6 @@ elife_metrics:
     name: elife-metrics
     install_path: /srv/elife-metrics
 
-    db:
-        name: metrics
-        username: dummy
-        password: dummy
-        host: 127.0.0.1
-        port: 5432
-
     secret: "dev.settings.do.not.use.in.prod.ever"
 
     ga_table_id: 12345678
@@ -39,3 +32,8 @@ elife_metrics:
         client_id: bar
         client_email: bup
         type: service_account
+
+elife:
+    db:
+        app:
+            name: metrics

@@ -1,29 +1,27 @@
 {% set app = pillar.elife_metrics %}
 {% set deploy_user = pillar.elife.deploy_user.username %}
 
-# this was part of some ssl issues iirc. no longer a problem
-#elife-metrics-deps:
-#    pkg.installed:
-#        - pkgs: 
-#            - libffi-dev
-
 install-elife-metrics:
-    file.directory:
-        - name: /srv/elife-metrics/
-        - user: {{ deploy_user }}
-        - group: {{ deploy_user }}
-
     builder.git_latest:
-        - user: {{ deploy_user }}
-        - name: https://github.com/elifesciences/elife-metrics
-        - rev: {{ salt['elife.cfg']('project.revision', 'project.branch', 'master') }}
+        - name: git@github.com:elifesciences/elife-metrics
+        - identity: {{ pillar.elife.projects_builder.key or '' }}
+        - rev: {{ salt['elife.rev']() }}
         - branch: {{ salt['elife.branch']() }}
         - target: /srv/elife-metrics/
         - force_fetch: True
         - force_checkout: True
         - force_reset: True
+
+    file.directory:
+        - name: /srv/elife-metrics/
+        - user: {{ deploy_user }}
+        - group: {{ deploy_user }}
+        - recurse:
+            - user
+            - group
         - require:
-            - file: install-elife-metrics
+            - builder: install-elife-metrics
+
 
 cfg-file:
     file.managed:
@@ -80,62 +78,11 @@ elife-metrics-syslog-conf:
         - watch_in:
             - service: syslog-ng
 
-
-#
-# db
-#
-
-elife-metrics-db-user:
-    postgres_user.present:
-        - name: {{ app.db.username }}
-        - encrypted: True
-        - password: {{ app.db.password }}
-        - refresh_password: True
-        - db_user: {{ pillar.elife.db_root.username }}
-        {% if salt['elife.cfg']('cfn.outputs.RDSHost') %}
-        - db_password: {{ salt['elife.cfg']('project.rds_password') }}
-        - db_host: {{ salt['elife.cfg']('cfn.outputs.RDSHost') }}
-        - db_port: {{ salt['elife.cfg']('cfn.outputs.RDSPort') }}
-        {% else %}
-        - db_password: {{ pillar.elife.db_root.password }}
-        {% endif %}
-        - createdb: True
-        - require:
-            - postgres_user: postgresql-user
-
-elife-metrics-db-exists:
-    postgres_database.present:
-        {% if salt['elife.cfg']('cfn.outputs.RDSHost') %}
-        # remote
-        - name: {{ salt['elife.cfg']('project.rds_dbname') }}
-        - db_host: {{ salt['elife.cfg']('cfn.outputs.RDSHost') }}
-        - db_port: {{ salt['elife.cfg']('cfn.outputs.RDSPort') }}
-        {% else %}
-        # local
-        - name: {{ app.db.name }}
-        {% endif %}
-        - db_user: {{ app.db.username }}
-        - db_password: {{ app.db.password }}
-        - require:
-            - postgres_user: elife-metrics-db-user
-
-db-perms-to-rds_superuser:
-    cmd.script:
-        - name: salt://elife/scripts/rds-perms.sh
-        - template: jinja
-        - defaults:
-            user: {{ app.db.username }}
-            pass: {{ app.db.password }}
-        - require:
-            - elife-metrics-db-exists
-
 ubr-app-db-backup:
     file.managed:
         - name: /etc/ubr/elife-metrics-backup.yaml
         - source: salt://elife-metrics/config/etc-ubr-elife-metrics-backup.yaml
         - template: jinja
-        - require:
-            - elife-metrics-db-exists
 
 #
 # configure
@@ -150,7 +97,6 @@ configure-elife-metrics:
             - install-elife-metrics
             - file: cfg-file
             - file: elife-metrics-log-file
-            - postgres_user: elife-metrics-db-user
 
 aws-credentials-deploy-user:
     file.managed:
@@ -210,8 +156,15 @@ load-articles-every-day:
         - identifier: load-metrics-every-day
         - minute: 0
         - hour: 0
-        - require:
-            - postgres_database: elife-metrics-db-exists
+
+# once a week, remove any partial files that are hanging around
+# these are deliberate cache misses for periods that will return partial results
+rm-partial-files-every-week:
+    cron.present:
+        - user: {{ deploy_user }}
+        - name: cd /srv/elife-metrics/output && find . -name '*\.partial' -delete
+        - identifier: rm-partial-files-every-week
+        - special: "@weekly"
 
 logrotate-metrics-logs:
     file.managed:
