@@ -6,12 +6,8 @@ elife-metrics-nginx-conf:
         - require:
             - pkg: nginx-server
             - cmd: web-ssl-enabled
-
-# we used to redirect all traffic to https but don't anymore
-# now we simply block all external traffic on port 80
-remove-unencrypted-redirect:
-    file.absent:
-        - name: /etc/nginx/sites-enabled/unencrypted-redirect.conf
+        - watch_in:
+            - nginx-server-service
 
 elife-metrics-uwsgi-conf:
     file.managed:
@@ -28,20 +24,17 @@ uwsgi-elife-metrics-upstart:
         - template: jinja
         - mode: 755
 
-uwsgi-elife-metrics-systemd:
-    file.managed:
-        - name: /lib/systemd/system/uwsgi-elife-metrics.service
-        - source: salt://elife-metrics/config/lib-systemd-system-uwsgi-elife-metrics.service
-        - template: jinja
+uwsgi-elife-metrics.socket:
+    service.running:
+        - enable: True
 
 uwsgi-elife-metrics:
     service.running:
         - enable: True
         - require:
+            - uwsgi-elife-metrics.socket
             - file: uwsgi-params
             - uwsgi-pkg
-            - file: uwsgi-elife-metrics
-            - uwsgi-elife-metrics-systemd
             - uwsgi-elife-metrics-upstart
             - file: elife-metrics-uwsgi-conf
             - file: elife-metrics-nginx-conf
