@@ -1,1 +1,1 @@
-elifeFormula('elife-metrics', '/srv/elife-metrics', 'elife-metrics-formula', ['s1604'])
+elifeFormula('elife-metrics', '/srv/elife-metrics', null, ['s1604'])
