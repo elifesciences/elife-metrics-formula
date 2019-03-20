@@ -24,21 +24,18 @@ uwsgi-elife-metrics-upstart:
         - template: jinja
         - mode: 755
 
-{% if salt['grains.get']('osrelease') == "14.04" %}
-uwsgi-elife-metrics.socket:
-    cmd.run:
-        - name: echo "dummy state"
-{% else %}
+{% if salt['grains.get']('osrelease') != "14.04" %}
 uwsgi-elife-metrics.socket:
     service.running:
         - enable: True
+        - require_in:
+            - uwsgi-elife-metrics
 {% endif %}
 
 uwsgi-elife-metrics:
     service.running:
         - enable: True
         - require:
-            - uwsgi-elife-metrics.socket
             - file: uwsgi-params
             - uwsgi-pkg
             - uwsgi-elife-metrics-upstart
