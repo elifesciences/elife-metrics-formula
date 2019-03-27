@@ -44,6 +44,19 @@ elife-metrics-log-file:
         - user: {{ deploy_user }}
         - group: {{ pillar.elife.webserver.username }}
         - mode: 660
+        - require:
+            - install-elife-metrics
+
+# vagrant uses the 'dev' environment
+elife-metrics-dev-log-file:
+    file.managed:
+        - name: /srv/elife-metrics/elife-metrics.log
+        - user: {{ deploy_user }}
+        - group: {{ pillar.elife.webserver.username }}
+        - mode: 660
+        - require:
+            - install-elife-metrics
+
 
 elife-metrics-debugme-log-file:
     file.managed:
