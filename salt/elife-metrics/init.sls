@@ -1,6 +1,11 @@
 {% set app = pillar.elife_metrics %}
 {% set deploy_user = pillar.elife.deploy_user.username %}
 
+elife-metrics-deps:
+    pkg.installed:
+        - pkgs:
+            - sqlite3 # for accessing requests_cache db
+
 install-elife-metrics:
     builder.git_latest:
         - name: git@github.com:elifesciences/elife-metrics
