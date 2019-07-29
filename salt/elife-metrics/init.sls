@@ -1,6 +1,11 @@
 {% set app = pillar.elife_metrics %}
 {% set deploy_user = pillar.elife.deploy_user.username %}
 
+elife-metrics-deps:
+    pkg.installed:
+        - pkgs:
+            - sqlite3 # for accessing requests_cache db
+
 install-elife-metrics:
     builder.git_latest:
         - name: git@github.com:elifesciences/elife-metrics
@@ -162,8 +167,19 @@ load-articles-every-day:
 rm-partial-files-every-week:
     cron.present:
         - user: {{ deploy_user }}
+        {% if pillar.elife.env == 'prod' %}
+        - name: cd /ext/elife-metrics/output && find . -name '*\.partial' -delete
+        {% else %}
         - name: cd /srv/elife-metrics/output && find . -name '*\.partial' -delete
+        {% endif %}
         - identifier: rm-partial-files-every-week
+        - special: "@weekly"
+
+periodically-remove-expired-cache-entries:
+    cron.present:
+        - user: {{ deploy_user }}
+        - name: cd /srv/elife-metrics/ && ./clear-expired-requests-cache.sh
+        - identifier: rm-expired-cache-entries
         - special: "@weekly"
 
 logrotate-metrics-logs:
