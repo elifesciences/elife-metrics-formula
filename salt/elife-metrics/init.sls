@@ -175,6 +175,13 @@ rm-partial-files-every-week:
         - identifier: rm-partial-files-every-week
         - special: "@weekly"
 
+periodically-remove-expired-cache-entries:
+    cron.present:
+        - user: {{ deploy_user }}
+        - name: cd /srv/elife-metrics/ && ./clear-expired-requests-cache.sh
+        - identifier: rm-expired-cache-entries
+        - special: "@weekly"
+
 logrotate-metrics-logs:
     file.managed:
         - name: /etc/logrotate.d/elife-metrics
