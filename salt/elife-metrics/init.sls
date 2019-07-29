@@ -162,7 +162,11 @@ load-articles-every-day:
 rm-partial-files-every-week:
     cron.present:
         - user: {{ deploy_user }}
+        {% if pillar.elife.env == 'prod' %}
+        - name: cd /ext/elife-metrics/output && find . -name '*\.partial' -delete
+        {% else %}
         - name: cd /srv/elife-metrics/output && find . -name '*\.partial' -delete
+        {% endif %}
         - identifier: rm-partial-files-every-week
         - special: "@weekly"
 
