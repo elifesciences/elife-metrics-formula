@@ -95,7 +95,7 @@ ubr-app-db-backup:
 
 configure-elife-metrics:
     cmd.run:
-        - user: {{ deploy_user }}
+        - runas: {{ deploy_user }}
         - cwd: /srv/elife-metrics/
         - name: ./install.sh && ./manage.sh collectstatic --noinput
         - require:
@@ -135,7 +135,7 @@ elife-metrics-auth:
 
 load-pmcids:
     cmd.run:
-        - user: {{ deploy_user }}
+        - runas: {{ deploy_user }}
         - cwd: /srv/elife-metrics/
         - name: ./download-pmcids.sh && touch /home/elife/.pmcids-loaded.flag
         - creates: /home/elife/.pmcids-loaded.flag
