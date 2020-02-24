@@ -6,6 +6,7 @@ elife-metrics-nginx-conf:
         - require:
             - pkg: nginx-server
             - cmd: web-ssl-enabled
+            - uwsgi-params # builder-base.uwsgi-params
         - watch_in:
             - nginx-server-service
 
