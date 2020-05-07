@@ -18,20 +18,11 @@ elife-metrics-uwsgi-conf:
         - require:
             - install-elife-metrics
 
-uwsgi-elife-metrics-upstart:
-    file.managed:
-        - name: /etc/init/uwsgi-elife-metrics.conf
-        - source: salt://elife-metrics/config/etc-init-uwsgi-elife-metrics.conf
-        - template: jinja
-        - mode: 755
-
-{% if salt['grains.get']('osrelease') != "14.04" %}
 uwsgi-elife-metrics.socket:
     service.running:
         - enable: True
         - require_in:
             - uwsgi-elife-metrics
-{% endif %}
 
 uwsgi-elife-metrics:
     service.running:
@@ -39,7 +30,6 @@ uwsgi-elife-metrics:
         - require:
             - file: uwsgi-params
             - uwsgi-pkg
-            - uwsgi-elife-metrics-upstart
             - file: elife-metrics-uwsgi-conf
             - file: elife-metrics-nginx-conf
             - file: elife-metrics-log-file
