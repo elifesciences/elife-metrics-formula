@@ -1,1 +1,1 @@
-elifeFormula('elife-metrics', '/srv/elife-metrics', null, ['snsalt'])
+elifeFormula('elife-metrics', '/srv/elife-metrics')
