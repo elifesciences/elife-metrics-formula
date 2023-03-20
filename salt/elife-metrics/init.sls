@@ -37,6 +37,16 @@ cfg-file:
         - require:
             - install-elife-metrics
 
+elife-metrics-auth:
+    file.serialize:
+        - name: /srv/elife-metrics/client-secrets.json
+        - dataset_pillar: elife_metrics:client_secrets
+        - formatter: json
+        - user: {{ deploy_user }}
+        - group: {{ deploy_user }}
+        - require:
+            - install-elife-metrics
+
 #
 # logging
 #
@@ -112,6 +122,7 @@ configure-elife-metrics:
             - install-elife-metrics
             - file: cfg-file
             - file: elife-metrics-log-file
+            - elife-metrics-auth
 
 aws-credentials-deploy-user:
     file.managed:
@@ -133,15 +144,6 @@ aws-credentials-www-data-user:
         - require:
             - configure-elife-metrics
 
-elife-metrics-auth:
-    file.serialize:
-        - name: /srv/elife-metrics//client-secrets.json
-        - dataset_pillar: elife_metrics:client_secrets
-        - formatter: json
-        - user: {{ deploy_user }}
-        - group: {{ deploy_user }}
-        - require:
-            - install-elife-metrics
 
 load-pmcids:
     cmd.run:
