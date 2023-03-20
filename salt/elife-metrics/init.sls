@@ -32,10 +32,18 @@ cfg-file:
     file.managed:
         - user: {{ deploy_user }}
         - name: /srv/elife-metrics/app.cfg
-        - source:
-            - salt://elife-metrics/config/srv-elife-metrics-{{ salt['elife.cfg']('project.branch') }}.cfg
-            - salt://elife-metrics/config/srv-elife-metrics-app.cfg
+        - source: salt://elife-metrics/config/srv-elife-metrics-app.cfg
         - template: jinja
+        - require:
+            - install-elife-metrics
+
+elife-metrics-auth:
+    file.serialize:
+        - name: /srv/elife-metrics/client-secrets.json
+        - dataset_pillar: elife_metrics:client_secrets
+        - formatter: json
+        - user: {{ deploy_user }}
+        - group: {{ deploy_user }}
         - require:
             - install-elife-metrics
 
@@ -114,6 +122,7 @@ configure-elife-metrics:
             - install-elife-metrics
             - file: cfg-file
             - file: elife-metrics-log-file
+            - elife-metrics-auth
 
 aws-credentials-deploy-user:
     file.managed:
@@ -135,15 +144,6 @@ aws-credentials-www-data-user:
         - require:
             - configure-elife-metrics
 
-elife-metrics-auth:
-    file.serialize:
-        - name: /srv/elife-metrics//client-secrets.json
-        - dataset_pillar: elife_metrics:client_secrets
-        - formatter: json
-        - user: {{ deploy_user }}
-        - group: {{ deploy_user }}
-        - require:
-            - install-elife-metrics
 
 load-pmcids:
     cmd.run:
