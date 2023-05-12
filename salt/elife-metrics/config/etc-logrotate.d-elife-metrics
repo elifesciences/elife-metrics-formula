@@ -6,3 +6,12 @@
     compress
     copytruncate
 }
+
+/srv/elife-metrics/debugme.log {
+    size 50M
+    rotate 7
+    notifempty
+    missingok
+    compress
+    copytruncate
+}
