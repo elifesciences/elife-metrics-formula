@@ -1,6 +1,7 @@
 elife_metrics:
     name: elife-metrics
     install_path: /srv/elife-metrics
+    log_file: /var/log/elife-metrics.log
 
     secret: "dev.settings.do.not.use.in.prod.ever"
 

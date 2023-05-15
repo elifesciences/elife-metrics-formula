@@ -32,10 +32,18 @@ cfg-file:
     file.managed:
         - user: {{ deploy_user }}
         - name: /srv/elife-metrics/app.cfg
-        - source:
-            - salt://elife-metrics/config/srv-elife-metrics-{{ salt['elife.cfg']('project.branch') }}.cfg
-            - salt://elife-metrics/config/srv-elife-metrics-app.cfg
+        - source: salt://elife-metrics/config/srv-elife-metrics-app.cfg
         - template: jinja
+        - require:
+            - install-elife-metrics
+
+elife-metrics-auth:
+    file.serialize:
+        - name: /srv/elife-metrics/client-secrets.json
+        - dataset_pillar: elife_metrics:client_secrets
+        - formatter: json
+        - user: {{ deploy_user }}
+        - group: {{ deploy_user }}
         - require:
             - install-elife-metrics
 
@@ -93,15 +101,28 @@ ubr-app-db-backup:
 # configure
 # 
 
+# bit of a hack, the app will try to create this dir itself if it detects /ext exists to write in.
+# and while /ext might exist, it might not be writeable by the app. create it here to prevent a nuisance.
+elife-metrics-ext-vol-dir:
+    file.directory:
+        - name: /ext/elife-metrics
+        - makedirs: True
+        - user: {{ deploy_user }}
+        - dir_mode: 755
+        - onlyif:
+            - test -d /ext
+
 configure-elife-metrics:
     cmd.run:
         - runas: {{ deploy_user }}
         - cwd: /srv/elife-metrics/
         - name: ./install.sh && ./manage.sh collectstatic --noinput
         - require:
+            - file: elife-metrics-ext-vol-dir
             - install-elife-metrics
             - file: cfg-file
             - file: elife-metrics-log-file
+            - elife-metrics-auth
 
 aws-credentials-deploy-user:
     file.managed:
@@ -123,15 +144,6 @@ aws-credentials-www-data-user:
         - require:
             - configure-elife-metrics
 
-elife-metrics-auth:
-    file.serialize:
-        - name: /srv/elife-metrics//client-secrets.json
-        - dataset_pillar: elife_metrics:client_secrets
-        - formatter: json
-        - user: {{ deploy_user }}
-        - group: {{ deploy_user }}
-        - require:
-            - install-elife-metrics
 
 load-pmcids:
     cmd.run:
