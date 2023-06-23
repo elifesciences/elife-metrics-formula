@@ -185,7 +185,7 @@ rm-partial-files-every-week:
         - name: cd /srv/elife-metrics/output && find . -name '*\.partial' -delete
         {% endif %}
         - identifier: rm-partial-files-every-week
-        - special: "@weekly"
+        - special: "@daily"
 
 periodically-remove-expired-cache-entries:
     cron.present:
