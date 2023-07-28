@@ -176,8 +176,9 @@ load-articles-every-day:
 
 # once a week, remove any partial files that are hanging around
 # these are deliberate cache misses for periods that will return partial results
+# lsh@2023-07-28: this state can be removed once all envs have been updated (~1 week max).
 rm-partial-files-every-week:
-    cron.present:
+    cron.absent:
         - user: {{ deploy_user }}
         {% if pillar.elife.env == 'prod' %}
         - name: cd /ext/elife-metrics/output && find . -name '*\.partial' -delete
