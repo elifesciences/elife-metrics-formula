@@ -21,8 +21,6 @@ elife-metrics-uwsgi-conf:
 uwsgi-elife-metrics.socket:
     service.running:
         - enable: True
-        - require_in:
-            - uwsgi-elife-metrics
 
 uwsgi-elife-metrics:
     service.running:
@@ -34,6 +32,7 @@ uwsgi-elife-metrics:
             - file: elife-metrics-nginx-conf
             - file: elife-metrics-log-file
             - file: elife-metrics-debugme-log-file
+            - uwsgi-elife-metrics.socket
         - watch:
             - cfg-file
             - install-elife-metrics
