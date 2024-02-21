@@ -1,0 +1,36 @@
+(config) {
+    log {
+        output file /var/log/caddy/access.log
+        format json {
+            time_format rfc3339
+        }
+    }
+
+    handle_path /static/* {
+        file_server {
+            root /srv/elife-metrics/collected-static/
+        }
+    }
+
+    handle {
+        reverse_proxy unix//var/run/uwsgi/elife-metrics.socket {
+            transport http {
+                # drop connection after this many seconds.
+                # WARNING: this value *must* be higher than uwsgi's 'harakiri' value (10s): /srv/$app/uwsgi.ini
+                read_timeout 15s # drop connection after 15s if nothing read from reverse proxy.
+            }
+        }
+    }
+}
+
+:80 {
+    import config
+}
+
+{% if salt['elife.cfg']('cfn.outputs.DomainName') -%}
+:443 {
+    import ../snippets/certs
+    import config
+}
+{% endif %}
+

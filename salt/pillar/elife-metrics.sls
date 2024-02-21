@@ -35,12 +35,15 @@ elife_metrics:
         type: service_account
 
 elife:
+    webserver:
+        app: caddy
+
     db:
         app:
             name: metrics
 
-    # systemd/16.04+ only
     uwsgi:
         services:
             elife-metrics:
                 folder: /srv/elife-metrics
+                protocol: http-socket
