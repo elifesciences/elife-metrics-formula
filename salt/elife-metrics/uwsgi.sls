@@ -1,4 +1,20 @@
-elife-metrics-nginx-conf:
+{% if pillar.elife.webserver.app == "caddy" %}
+
+elife-metrics-vhost-conf:
+    file.managed:
+        - name: /etc/caddy/sites.d/elife-metrics
+        - source: salt://elife-metrics/config/etc-caddy-sites.d-elife-metrics
+        - template: jinja
+        - require_in:
+            - cmd: caddy-validate-config
+            - service: uwsgi-elife-metrics
+        - watch_in:
+            # restart caddy if site config changes
+            - service: caddy-server-service
+
+{% else %}
+
+elife-metrics-vhost-conf:
     file.managed:
         - name: /etc/nginx/sites-enabled/elife-metrics.conf
         - template: jinja
@@ -9,6 +25,8 @@ elife-metrics-nginx-conf:
             - uwsgi-params # builder-base.uwsgi-params
         - watch_in:
             - nginx-server-service
+
+{% endif %}
 
 elife-metrics-uwsgi-conf:
     file.managed:
@@ -29,7 +47,7 @@ uwsgi-elife-metrics:
             - file: uwsgi-params
             - uwsgi-pkg
             - file: elife-metrics-uwsgi-conf
-            - file: elife-metrics-nginx-conf
+            - file: elife-metrics-vhost-conf
             - file: elife-metrics-log-file
             - file: elife-metrics-debugme-log-file
             - uwsgi-elife-metrics.socket
